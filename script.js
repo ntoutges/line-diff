@@ -151,7 +151,7 @@ function getDiffLines( aVal, bVal ) {
       const patternB = b[j];
       let doPatternsMatch = true;
       for (let k = 1; k < a[i].length; k++) {
-        if ((patternA[k] != patternB[k]) && symGroups.has(k)) { // don't match, but need to
+        if ((patternA[k] == patternB[k]) != symGroups.has(k)) { // != works as XNOR
           doPatternsMatch = false;
           break;
         }
