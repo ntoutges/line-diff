@@ -1,0 +1,290 @@
+body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0px;
+  padding: 0px;
+  background-color: cornsilk;
+
+  display: flex;
+  flex-direction: column;
+
+  /* overflow: hidden; */
+}
+
+#tab-container {
+  margin-top: 5px;
+
+  display: flex;
+  flex-direction: row;
+
+  .tabs {
+    padding: 2px 10px 2px 5px;
+    border-top-right-radius: 10px;
+    font-size: 1.2em;
+
+    user-select: none;
+
+    &:hover {
+      cursor: pointer;
+      filter: brightness(1.1);
+    }
+
+    background: #d3d3d3;
+    &:nth-child(odd) {
+      background: #ababab;
+    }
+
+    &.selected {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+  }
+}
+
+.modes {
+  height: calc(100% - 10px);
+  padding: 5px;
+  display: flex;
+
+  &:not(.selected) {
+    display: none;
+  }
+}
+
+#text-mode {
+  background: #b7c5fb;  
+
+  flex-direction: column;
+  gap: 5px;
+}
+
+#text-mode-inputs {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+
+  .inputs {
+    resize: none;
+    flex: 1 1 0;
+
+    border: 1px #767676 solid;
+    background: white;
+    padding: 2px;
+
+    font-family: monospace;
+    font-size: 1em;
+  }
+
+  flex: 2 1 0; /* give more weight to inputs */
+}
+
+#text-output-container {
+  border: 1px #767676 solid;
+  background: white;
+  padding: 2px;
+
+  font-family: monospace;
+  font-size: 1em;
+
+  flex: 1 1 0;
+
+  &:empty::after {
+    content: '< empty >';
+    color: grey;
+    text-align: center;
+    display: block;
+  }
+
+  min-height: 0px;
+  overflow: auto;
+}
+
+#mode-container {
+  flex-grow: 1;
+  min-height: 0px;
+}
+
+#pattern-container {
+  display: flex;
+  flex-direction: row;
+  
+  font-size: 2em;
+  font-family: monospace;
+
+  background: white;
+  
+  &:hover {
+    cursor: text;  
+  }
+
+  &:before {
+    padding: 5px 0px 5px 5px;
+  }
+
+  &::before,
+  #regex-flags::before {
+    content: '/';
+    color: grey;
+  }
+
+  &::before,
+  #regex-flags,
+  #regex-flags::before {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  #regex-flags {
+    padding: 5px 0px;
+
+    color: grey;
+    user-select: none;
+  }
+
+  #regex-pattern {
+    padding: 5px 5px 5px 0px;
+    border: 1px;
+    /* flex: 1 1 0; */
+    font-family: inherit;
+    font-size: inherit;
+
+    background: transparent;
+
+    &:focus {
+      outline: none;
+    }
+
+    min-width: 10px;
+  }
+
+  &:has(> #regex-pattern:focus) {
+    outline: solid black 2px;
+  }
+
+  margin: 5px;
+  border: solid #767676 1px;
+}
+
+.text-measurer {
+  position: absolute;
+  transform: translateX(-200%); /* keep offscreen */
+  visibility: hidden;
+  white-space: pre;
+}
+
+#warning:empty {
+  display: none;
+}
+
+#warning {
+  padding: 5px;
+  background: #ffd3d3;
+  color: #930000;
+}
+
+#text-output {
+  display: grid;
+  grid-template-columns: min-content auto min-content auto;
+
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.text-output-containers {
+  display: contents;
+
+  &:hover > * {
+    filter: brightness(0.9);
+    cursor: pointer;
+  }
+
+  & > .line-texts {
+    padding-left: 5px;
+    background: #e4f8ff;
+  }
+  
+  & > .line-numbers {
+    padding-left: 5px;
+    padding-right: 5px;
+    background: #e3e3e3;
+    user-select: none;
+  }
+}
+
+.sym-groups {
+  padding: 2px 12px;
+  user-select: none;
+
+  &:hover {
+    filter: brightness(1.1);
+    cursor: pointer;
+  }
+
+  background: #b5b5b5;
+  &:nth-child(even) {
+    background: #d9d9d9;
+  }
+
+  &.selected {
+    background: #ade6ad;
+  }
+}
+
+#matching-ids {
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh; /* crude hack */
+  
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  & > * {
+    text-align: center;
+  }
+}
+
+#matching-id-label {
+  padding: 0px;
+  margin: 0px 0px 5px 0px;
+  font-size: 1.2em;
+}
+
+#grid-a,
+#grid-b {
+  display: grid;
+  flex: 1 1 0;
+  overflow-y: auto;
+  min-height: 0px;
+  border: solid black 2px;
+}
+
+#grid-mode-inputs {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  max-height: 100%;
+}
+
+#output-container {
+  width: 100%;
+}
+
+.grid-mode-rows {
+  display: contents;
+}
+
+.grid-mode-rows > * {
+  background: #dbdbdb;
+  padding: 5px;
+  text-align: center;
+}
+
+.grid-mode-headers > * {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.grid-mode-rows:nth-child(even) > * {
+  background: #bdbdbd;
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Line Matchr</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" type="module" defer></script>
+  </head>
+  <body>
+    <div id="pattern-container">
+      <input id="regex-pattern" placeholder="RegEx">
+      <div id="regex-flags">i</div>
+    </div>
+    <div id="warning"></div>
+    <div id="tab-container">
+      <div class="tabs" value="text">Text</div>
+      <div class="tabs" value="grid">Grid</div>
+    </div>
+    <div id="mode-container">
+      <div class="modes" id="text-mode" value="text">
+        <div id="text-mode-inputs">
+          <textarea id="input-a" class="inputs" placholder="Textfile A"></textarea>
+          <textarea id="input-b" class="inputs" placholder="Textfile B"></textarea>
+          <div id="matching-id-container">
+            <h2 id="matching-id-label" title="Selected groups MUST match to be considered different">SymGroups</h2>
+            <div id="matching-ids"></div>
+          </div>
+        </div>
+        <div id="text-output-container">
+          <div id="text-output"></div>
+        </div>
+      </div>
+      <div class="modes" id="grid-mode" value="grid">
+        <div id="input-container">
+      
+        </div>
+        <div id="output-container">
+          <div id="grid-mode-inputs">
+            <div id="grid-a"></div>
+            <div id="grid-b"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
