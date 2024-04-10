@@ -149,11 +149,14 @@ function getDiffLines( aVal, bVal ) {
       // loop through groups to check if they are the same
       const patternA = a[i];
       const patternB = b[j];
-      let doPatternsMatch = true;
+      let doPatternsMatch = false;
       for (let k = 1; k < a[i].length; k++) {
-        if ((patternA[k] == patternB[k]) != symGroups.has(k)) { // != works as XNOR
-          doPatternsMatch = false;
+        if (symGroups.has(k) && patternA[k] != patternB[k]) { // should match, but don't
           break;
+        }
+        if (!symGroups.has(k) && patternA[k] != patternB[k]) { // shouldn't match, but DO
+          doPatternsMatch = true;
+          break; // patterns match!
         }
       }
       if (doPatternsMatch) { // non-matching lines
