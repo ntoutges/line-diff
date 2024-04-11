@@ -203,6 +203,13 @@ body {
     padding-left: 5px;
     background: #e4f8ff;
   }
+
+  &.missings > .line-texts {
+    background: #d0ffd0;
+    &:empty {
+      background: #e3c2c2;
+    }
+  }
   
   & > .line-numbers {
     padding-left: 5px;
