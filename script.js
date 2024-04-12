@@ -2,7 +2,7 @@ const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 
 // set these to null to have nothing load in
-const defaultPattern = "^([^ ]+?) +(.+?)  +(.+?) +(.+?)  +(.+?) .*$";
+const defaultPattern = "^(.+?) +(.+?)  +(.+?) +(.+?)  +(.+?)(?:(?: .*$)|(?:$))";
 const defaultSym = "1,2,4"; // CSV
 const defaultFlags = "i"; // standard regex flag flags
 var initializing = true;
