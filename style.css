@@ -122,23 +122,46 @@ body {
   }
 
   &::before,
-  #regex-flags::before {
+  #regex-flag-container::before {
     content: '/';
     color: grey;
   }
 
   &::before,
-  #regex-flags,
-  #regex-flags::before {
+  #regex-flag-container,
+  #regex-flag-container::before {
     font-family: inherit;
     font-size: inherit;
   }
+  
 
-  #regex-flags {
+  #regex-flag-container {
     padding: 5px 0px;
 
-    color: grey;
+    color: #d6d7a4;
     user-select: none;
+
+    display: flex;
+    flex-direction: row;
+  }
+
+  .regex-flags {
+    order: 2;
+    
+    &:hover {
+      cursor: pointer;
+      outline: solid black 1px;
+    }
+
+    &.selected {
+      color: black;
+      order: 1;
+    }
+  }
+
+  .fake-regex-flags {
+    color: black;
+    order: 0;
   }
 
   #regex-pattern {

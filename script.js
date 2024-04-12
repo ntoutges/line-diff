@@ -3,9 +3,12 @@ const $$ = document.querySelectorAll.bind(document);
 
 // set these to null to have nothing load in
 const defaultPattern = "^([^ ]+?) +(.+?)  +(.+?) +(.+?)  +(.+?) .*$";
-const defaultSym = "1,2,4";
+const defaultSym = "1,2,4"; // CSV
+const defaultFlags = "i"; // standard regex flag flags
+var initializing = true;
 
 function init() {
+  initializing = true;
   const oldPattern = localStorage.getItem("pattern") ?? defaultPattern;
   if (oldPattern !== null) {
     $("#regex-pattern").value = oldPattern;
@@ -16,6 +19,8 @@ function init() {
   if (oldSymGroups !== null) {
     setSymPattern(oldSymGroups.split(",").map(num => +num));
   }
+  const oldFlags = localStorage.getItem("flags") ?? defaultFlags ?? "";
+  buildFlags("iuy", oldFlags);
 
   tabChange("text");
   Array.from($$(".tabs")).forEach(tab => {
@@ -42,6 +47,39 @@ function init() {
   if (inputAVal !== null) $("#input-a").value = inputAVal;
   if (inputBVal !== null) $("#input-b").value = inputBVal;
   if (inputAVal !== null || inputBVal !== null) inputChange(); // update
+
+  initializing = false;
+  inputChange();
+}
+
+const selectedFlags = new Set();
+function buildFlags(flags, selected="") {
+  for (const flag of flags) {
+    const el = document.createElement("div");
+    el.classList.add("regex-flags");
+    el.textContent = flag;
+    el.setAttribute("data-flag", flag);
+    $("#regex-flag-container").append(el);
+
+    el.addEventListener("click", toggleFlag);
+
+    if (selected.includes(flag)) el.click();
+  }
+}
+
+function toggleFlag() {
+  this.classList.toggle("selected");
+  const flag = this.getAttribute("data-flag");
+  
+  if (this.classList.contains("selected")) selectedFlags.add(flag);
+  else selectedFlags.delete(flag);
+  saveFlags();
+  
+  inputChange();
+}
+
+function saveFlags() {
+  localStorage.setItem("flags", Array.from(selectedFlags).reduce((acc, flag) => acc + flag, ""));
 }
 
 var lastTab = null;
@@ -87,8 +125,9 @@ var pattern = null;
 var symGroups = new Set([]);
 var patternLen = 0;
 function createPattern(patternStr) {
+  const flags = Array.from(selectedFlags).reduce((acc, flag) => acc + flag, "");
   try {
-    pattern = new RegExp(patternStr, "i");
+    pattern = new RegExp(patternStr, flags);
     patternLen = (new RegExp(patternStr + '|')).exec('').length - 1; // thank you stack overflow!
     populateSymPattern(patternLen);
     $("#warning").textContent = "";
@@ -137,6 +176,8 @@ function setSymPattern(indicesSet) {
 }
 
 function inputChange() {
+  if (initializing) return;
+
   const aVal = $("#input-a").value.split("\n");
   const bVal = $("#input-b").value.split("\n");
 
@@ -169,12 +210,10 @@ function getDiffLines(aVal, bVal) {
       const patternB = b[j];
       let doPatternsMatch = false;
       for (let k = 1; k < a[i].length; k++) {
-        if (symGroups.has(k) && patternA[k] != patternB[k]) { // should match, but don't
+        if (patternA[k] != patternB[k]) { // any difference indicates the end of the loop
+          if (selectedFlags.has("i") && patternA[k].toLowerCase() == patternB[k].toLowerCase()) continue; // case insensitive; and match when ignoring case
+          doPatternsMatch = !symGroups.has(k); // patterns match only if difference when there shouldn't be one
           break;
-        }
-        if (!symGroups.has(k) && patternA[k] != patternB[k]) { // shouldn't match, but DO
-          doPatternsMatch = true;
-          break; // patterns match!
         }
       }
       if (doPatternsMatch) { // non-matching lines
@@ -207,7 +246,7 @@ function getMissingIndices(
   const bGroups = new Map();
   aMap.forEach((val, index) => {
     let groups = [];
-    for (let i = 1; i < val.length; i++) { groups.push(val[i]); } // reduce regex output to array
+    for (let i = 1; i < val.length; i++) { groups.push(selectedFlags.has("i") ? val[i].toLowerCase() : val[i]); } // reduce regex output to array // if case insensitive: ignore case
     const key = groups.join("\n");
 
     if (!aGroups.has(key)) aGroups.set(key, []);
@@ -216,7 +255,7 @@ function getMissingIndices(
 
   bMap.forEach((val, index) => {
     let groups = [];
-    for (let i = 1; i < val.length; i++) { groups.push(val[i]); } // reduce regex output to array
+    for (let i = 1; i < val.length; i++) { groups.push(selectedFlags.has("i") ? val[i].toLowerCase() : val[i]); } // reduce regex output to array // if case insensitive: ignore case
     const key = groups.join("\n");
 
     if (!bGroups.has(key)) bGroups.set(key, []);
@@ -249,9 +288,24 @@ function getMissingIndices(
 
 function showDiffLines(diffIndices, aVal, bVal) {
   $("#text-output").innerHTML = ""; // remove all children
+  const lineData = [];
   diffIndices.differing.forEach(([ai, bi]) => { createLine(ai, bi, "differences"); });
-  diffIndices.aMissing.forEach((ai) => { createLine(ai, -1, "missings"); });
-  diffIndices.bMissing.forEach((bi) => { createLine(-1, bi, "missings"); });
+  // diffIndices.aMissing.forEach((ai) => { createLine(ai, -1, "missings"); });
+  // diffIndices.bMissing.forEach((bi) => { createLine(-1, bi, "missings"); });
+  
+  // push line data to be sorted before appending lines
+  // diffIndices.differing.forEach(([ai, bi]) => { lineData.push([ai, bi, "differences"]) });
+  diffIndices.aMissing.forEach((ai) => { lineData.push([ai, -1, "missings"]); });
+  diffIndices.bMissing.forEach((bi) => { lineData.push([-1, bi, "missings"]) });
+
+  // sort lines
+  lineData.sort((a,b) => {
+    const ai = (a[0] != -1) ? a[0] : ((a[1] != -1) ? a[1] : -1);
+    const bi = (b[0] != -1) ? b[0] : ((b[1] != -1) ? b[1] : -1);
+
+    return ai - bi;
+  });
+  for (const data of lineData) { createLine.apply(null, data); }
 
   function createLine(ai, bi, classname) {
     const aNumEl = document.createElement("div");
@@ -276,6 +330,9 @@ function showDiffLines(diffIndices, aVal, bVal) {
 
     aLineEl.addEventListener("click", () => { selectTextareaLine($("#input-a"), ai) });
     bLineEl.addEventListener("click", () => { selectTextareaLine($("#input-b"), bi) });
+
+    if (ai >= 0) container.style.order = ai;
+    else if (bi >= 0) container.style.order = bi;
   }
 }
 
@@ -335,7 +392,7 @@ function updateGrid() {
 
 // ctrl-c/ctrl-v: https://stackoverflow.com/questions/13650534/how-to-select-line-of-text-in-textarea
 function selectTextareaLine(tarea, lineNum) {
-  if (lineNum <= 0) return;
+  if (lineNum < 0) return;
 
   var lines = tarea.value.split("\n");
 
